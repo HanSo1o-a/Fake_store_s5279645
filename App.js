@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation ,useFocusEffect } from '@react-navigation/native';
-import Categories from './Categories'
-import CateGoods from './CateGoods'
-import ProductDetail from './ProductDetail'
+import Categories from './src/components/Categories'
+import CateGoods from './src/components/CateGoods'
+import ProductDetail from './src/components/ProductDetail'
 
 const Stack=createNativeStackNavigator();
 function App() {
