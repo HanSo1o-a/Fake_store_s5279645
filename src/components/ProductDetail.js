@@ -3,6 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation ,useFocusEffect } from '@react-navigation/native';
 import { getRequest } from '../utils/request.js';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '../models/rdstore.js';
+import Toast from 'react-native-toast-message';
+
 import {
     ScrollView,
     StatusBar,
@@ -25,8 +29,27 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 function ProductDetail({navigation, route}) {
+    const showToast = () => {
+        Toast.show({
+            type: 'success', 
+            text1: 'success',
+            text2: 'Add To Cart',
+            position: 'bottom', 
+            visibilityTime: 3000, 
+            autoHide: true, 
+            topOffset: 30, 
+            bottomOffset: 10, 
+            onShow: () => {}, 
+            onHide: () => {} 
+        });
+    };
+
+    const dispatch = useDispatch();
+    function AddToCart(data){
+        dispatch(addToCart(data));
+        showToast();
+    }
     const id = route.params;
-    console.log(id);
     const isDarkMode = useColorScheme() === 'dark';
     const backgroundStyle = {
         backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -35,13 +58,15 @@ function ProductDetail({navigation, route}) {
     const fetchData = async (id) => {
         try {
             const response = await getRequest('https://fakestoreapi.com/products/'+id);
-            console.log(response);
             setData(response);
           } catch (error) {
             console.error('GET 请求出错:', error);
         }
       };
-    fetchData(id);
+
+    useEffect(() => {
+        fetchData(id);
+    }, []);
     return (
       <View style={{ display: 'flex', flexDirection:'column', height: '100%' }}>
         <StatusBar
@@ -94,7 +119,7 @@ function ProductDetail({navigation, route}) {
     />
     <Text style={{ color: 'white', marginLeft: 10}}>Back</Text>
     </TouchableOpacity>
-    <TouchableOpacity onPress={()=> navigation.goBack()} style={{marginLeft: 20, flexDirection: 'row' , width: 120, alignItems: 'center', justifyContent:'center', backgroundColor: '#47A2D1', borderRadius: 6,  borderWidth: 2,  padding: 5 ,borderColor: 'black'}}>
+    <TouchableOpacity onPress={()=> AddToCart(data)} style={{marginLeft: 20, flexDirection: 'row' , width: 120, alignItems: 'center', justifyContent:'center', backgroundColor: '#47A2D1', borderRadius: 6,  borderWidth: 2,  padding: 5 ,borderColor: 'black'}}>
     <Image
         style={{ width: 15, height: 15 }}
         source={    
@@ -102,6 +127,7 @@ function ProductDetail({navigation, route}) {
     />
     <Text style={{ color: 'white', marginLeft: 10}}>Add To Cart</Text>
     </TouchableOpacity>
+    <Toast />
 </View>
 
     <Text style={{ marginLeft: 12, marginTop: 10, fontWeight: 'bold'}}>Description</Text>

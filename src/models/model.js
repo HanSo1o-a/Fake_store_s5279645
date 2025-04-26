@@ -1,22 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const saveData = async (value) => {
-    try {
-        await AsyncStorage.setItem('todoList', value);
-    } catch (error) {
-        console.error('error:', error);
-    }
+export const saveData = (key, value) => {
+    return new Promise((resolve, reject) => {
+        AsyncStorage.setItem(key, value)
+           .then(() => {
+                resolve();
+            })
+           .catch((error) => {
+                console.error('error:', error);
+                reject(error);
+            });
+    });
 };
 
-export const loadData = async () => {
-    try {
-        const value = await AsyncStorage.getItem('todoList');
-        if(value!=null){
-            return JSON.parse(value);
-        }else{
-            return [];
-        }
-    } catch (error) {
-        console.error('error:', error);
-    }
+export const getData = (key) => {
+    return new Promise((resolve, reject) => {
+        AsyncStorage.getItem(key)
+           .then((value) => {
+                resolve(value);
+            })
+           .catch((error) => {
+                console.error('error:', error);
+                reject(error);
+            });
+    });
 };
+   

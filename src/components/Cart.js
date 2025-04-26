@@ -1,0 +1,213 @@
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { getRequest } from '../utils/request.js';
+import { useSelector, useDispatch } from'react-redux';
+import { addToCart, delFromCart } from '../models/rdstore.js';
+import Toast from 'react-native-toast-message';
+
+import {
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    useColorScheme,
+    View,
+    FlatList,
+    TextInput,
+    Image,
+    TouchableOpacity,
+} from 'react-native';
+
+import {
+    Colors,
+    DebugInstructions,
+    Header,
+    LearnMoreLinks,
+    ReloadInstructions
+} from 'react-native/Libraries/NewAppScreen';
+
+
+function Cart({ navigation, route }) {
+    const showToast = () => {
+        Toast.show({
+            type: 'success',
+            text1: 'success',
+            text2: 'Add To Cart',
+            position: 'bottom',
+            visibilityTime: 3000,
+            autoHide: true,
+            topOffset: 30,
+            bottomOffset: 10,
+            onShow: () => { },
+            onHide: () => { }
+        });
+    };
+
+    const dispatch = useDispatch();
+    function addCart(item) {
+        dispatch(addToCart(item))
+    }
+
+    function delCart(item) {
+        dispatch(delFromCart(item))
+    }
+
+    const isDarkMode = useColorScheme() === 'dark';
+    const backgroundStyle = {
+        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    };
+    const safePadding = '5%';
+    const data = useSelector(state => state.cart.items);
+    const totalQuantity = data.reduce((ac, item) => ac + item.quantity, 0);
+    const totalPrice = data.reduce((ac, item) => ac + (item.price * item.quantity), 0);
+    function renderItem({ item }) {
+        return (
+            <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('ProductDetail', item.id)} >
+                <Image
+                    source={{ uri: item.image }}
+                    style={styles.goodsLogo}
+                />
+                <View style={{ flex: 1, height: '100%' }}>
+                    <View style={{ width: 230, marginLeft: 10, flexDirection: 'column', height: 100 }}>
+                        <Text style={{ color: '#2A6DC7' }}>{item.title}</Text>
+                        <View style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+                            <Text style={{ color: '#000000', fontWeight: 'bold' }}>Price: </Text>
+                            <Text style={{ color: '#000000' }}>${item.price}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+                            <Text onPress={() => { delCart(item) }} style={{ backgroundColor: '#34801D', borderRadius: 20, color: 'white', width: 20, textAlign: 'center' }}>-</Text>
+                            <Text style={{ marginLeft: 10, marginRight: 10 }}>quantity: {item.quantity}</Text>
+                            <Text onPress={() => { addCart(item) }} style={{ backgroundColor: '#34801D', borderRadius: 20, color: 'white', width: 20, textAlign: 'center' }}>+</Text>
+                        </View>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    }
+    useEffect(() => {
+
+    }, []);
+
+    return (
+        <View style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <StatusBar
+                hidden
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                backgroundColor={backgroundStyle.backgroundColor}
+            />
+
+            <View style={styles.titleContainer}>
+                <Text style={styles.titleText}>
+                    Shopping Cart
+                </Text>
+            </View>
+            
+            {data.length === 0 ? (
+                <View style={styles.emptyCartContainer}>
+                    <Text style={styles.emptyCartText}>your cart is empty</Text>
+                </View>
+            ) : (
+                <View style={{flex: 1}}>
+                <View style={{ width: '90%', height: 1, backgroundColor: 'black', marginLeft: '5%' }}></View>
+                <View style={{ justifyContent: 'center', backgroundColor: '#4DAFCC', display: 'flex', flexDirection: 'row',margin: 20, borderRadius: 6, padding: 10, borderColor: 'black', borderWidth: 2 }}>
+                    <Text style={{flex:1}}></Text>
+                    <Text>Items: {totalQuantity}</Text>
+                    <Text style={{flex:1}}></Text>
+                    <Text>Total Price: ${totalPrice}</Text>
+                    <Text style={{flex:1}}></Text>
+                </View>
+                <View style={styles.listContainer}>
+                    <FlatList
+                        data={data}
+                        renderItem={renderItem}
+                        keyExtractor={(item, index) => index.toString()}
+                    />
+                </View>
+                <View style={{ width: '90%', height: 1, backgroundColor: 'black', marginLeft: '5%' }}></View>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20,marginBottom: 20 }}>
+                <TouchableOpacity style={{ flexDirection: 'row', width: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2B6CCF', borderRadius: 6, borderWidth: 2, padding: 5, borderColor: '#000000' }}>
+                    <Image
+                        style={{ width: 15, height: 15 }}
+                        source={
+                            require('../../images/wallet.png')
+                        }
+                    />
+                    <Text style={{ color: 'white', marginLeft: 10 }}>Check Out</Text>
+                </TouchableOpacity>
+            </View>
+                </View>
+            )}
+            
+            
+            <Toast />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    highlight: {
+        fontWeight: '700',
+    },
+    listContainer: {
+        flex: 1,
+        margin: 10,
+        borderRadius: 6,
+    },
+    titleContainer: {
+        paddingTop: 30,
+        paddingBottom: 10,
+    },
+    titleText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        backgroundColor: '#47A2D1',
+        textAlign: 'center',
+        padding: 10,
+        borderColor: '#000000',
+        borderRadius: 6,
+        borderWidth: 2,
+        margin: 10,
+    },
+    listItem: {
+        display: 'flex',
+        flexDirection: 'row',
+        backgroundColor: '#DEDEDE',
+        margin: 8,
+        padding: 8,
+        borderRadius: 5,
+        borderColor: '#000000'
+    },
+    addBtn: {
+        color: '#5898FF',
+        textAlign: 'center',
+        fontSize: 20,
+        marginBottom: 10
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: 'black',
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    goodsLogo: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+    },
+    emptyCartContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyCartText: {
+        fontSize: 18,
+        color: '#000000',
+    }
+});
+
+export default Cart;

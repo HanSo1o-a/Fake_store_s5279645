@@ -24,43 +24,33 @@ import {
     ReloadInstructions
 } from 'react-native/Libraries/NewAppScreen';
 
-function CateGoods({navigation, route}) {
-    const title = route.params.title;
+function Categories({navigation}) {
     const isDarkMode = useColorScheme() === 'dark';
+
     const backgroundStyle = {
         backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     };
     const safePadding = '5%';
     const [data, setData] = useState([]);
-    const fetchData = async (title) => {
-        try {
-            const response = await getRequest('https://fakestoreapi.com/products/category/'+title);
-            setData(response);
-          } catch (error) {
-            console.error('GET 请求出错:', error);
-        }
-      };
-    fetchData(title);
     function renderItem({ item }) {
       return (
-          <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('ProductDetail', item.id)}>
-              <Image
-                    source={{ uri: item.image }} 
-                    style={styles.goodsLogo} 
-              />
-              <View style={{flex:1, height: '100%'}}>
-                <View style={{ width: 230, marginLeft: 10, flexDirection: 'column', height: 100}}>
-                    <Text style={{  color : '#2A6DC7', flex:1}} >{item.title}</Text>
-                    <View style={{ display:'flex', flexDirection: 'row'}}>
-                        <Text style={{ color : '#000000', fontWeight: 'bold'}} >Price: </Text>
-                        <Text style={{ color : '#000000'}} >${item.price}</Text>
-                    </View>
-                </View>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.listItem}>
+              <Text style={{   color : '#2A6DC7'}} onPress={() => navigation.navigate('CateGoods', item)}>{item}</Text>
+          </View>
       );
   }
-    
+    const fetchData = async () => {
+      try {
+          const response = await getRequest('https://fakestoreapi.com/products/categories');
+          console.log(response);
+          setData(response);
+        } catch (error) {
+          console.error('GET 请求出错:', error);
+      }
+    };
+      useEffect(() => {
+        fetchData();
+    }, []);
 
     return (
       <View style={{ display: 'flex', flexDirection:'column', height: '100%' }}>
@@ -71,7 +61,7 @@ function CateGoods({navigation, route}) {
         />
         <View style={styles.titleContainer}>
             <Text style={styles.titleText}>
-                {title}
+                Categories
             </Text>
         </View>
 
@@ -83,17 +73,7 @@ function CateGoods({navigation, route}) {
             />
         </View>
 
-        <View  style={{ flexDirection: 'row' , justifyContent: 'center'}}>
-            <TouchableOpacity onPress={()=> navigation.goBack()} style={{ flexDirection: 'row' , width: 80, alignItems: 'center', justifyContent:'center', backgroundColor: '#47A2D1', borderRadius: 6,  borderWidth: 2,  padding: 5 ,borderColor: 'black'}}>
-            <Image
-                style={{ width: 15, height: 15 }}
-                source={    
-                    require('../../images/backspace.png')}
-            />
-            <Text style={{ color: 'white', marginLeft: 10}}>Back</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
+      </View>
     );
 }
 
@@ -125,8 +105,6 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     listItem: {
-        display: 'flex',
-        flexDirection: 'row',
         backgroundColor: '#DEDEDE',
         margin: 8,
         padding: 8,
@@ -146,13 +124,8 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginTop: 10,
         marginBottom: 10,
-    },
-    goodsLogo: {
-        width: 100,
-        height: 100,
-        borderRadius: 8,
     }
 });
 
-export default CateGoods;
+export default Categories;
     
