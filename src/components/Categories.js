@@ -44,12 +44,10 @@ function Categories({navigation}) {
   }
     const fetchData = async () => {
       try {
-        console.log('https://fakestoreapi.com/products/categories');
           const response = await getRequest('https://fakestoreapi.com/products/categories');
-          console.log(response);
           setData(response);
         } catch (error) {
-          console.error('GET 请求出错:', error);
+          console.error('GET error:', error);
       }
     };
       useEffect(() => {

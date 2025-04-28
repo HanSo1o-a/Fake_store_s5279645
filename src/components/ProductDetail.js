@@ -60,7 +60,7 @@ function ProductDetail({navigation, route}) {
             const response = await getRequest('https://fakestoreapi.com/products/'+id);
             setData(response);
           } catch (error) {
-            console.error('GET 请求出错:', error);
+            console.error('GET error:', error);
         }
       };
 

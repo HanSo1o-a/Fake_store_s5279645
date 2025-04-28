@@ -45,7 +45,7 @@ function Categories({navigation}) {
           console.log(response);
           setData(response);
         } catch (error) {
-          console.error('GET 请求出错:', error);
+          console.error('GET error:', error);
       }
     };
       useEffect(() => {

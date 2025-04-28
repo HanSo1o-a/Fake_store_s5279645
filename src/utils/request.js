@@ -2,12 +2,12 @@ const baseRequest = async (url, options = {}) => {
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
-            throw new Error(`请求失败，状态码：${response.status}`);
+            throw new Error(`error：${response.status}`);
         }
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('网络请求出错:', error);
+        console.error('error:', error);
         throw error;
     }
 };
