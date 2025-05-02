@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const baseRequest = async (url, options = {}) => {
     try {
         const response = await fetch(url, options);
@@ -23,14 +24,19 @@ export const getRequest = async (url) => {
 };
 
 export const postRequest = async (url, body) => {
+    const token = await AsyncStorage.getItem('token');
+    console.log(token);
     const options = {
         method: 'POST',
         headers: {
+            'Authorization': 'Bearer '+ token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
     };
-    return baseRequest(url, options);
+    const res = baseRequest(url, options);
+    console.log(res);
+    return res;
 };
 
 export const putRequest = async (url, body) => {

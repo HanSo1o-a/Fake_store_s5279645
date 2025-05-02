@@ -25,4 +25,17 @@ export const getData = (key) => {
             });
     });
 };
+
+export const removeData = (key) => {
+    return new Promise((resolve, reject) => {
+        AsyncStorage.removeItem(key)
+           .then(() => {
+                resolve();
+            })
+           .catch((error) => {
+                console.error('error:', error);
+                reject(error);
+            });
+    });
+};
    

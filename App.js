@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -7,6 +7,7 @@ import Ionicons from'react-native-vector-icons/Ionicons';
 import Categories from './src/components/Categories'
 import CateGoods from './src/components/CateGoods'
 import ProductDetail from './src/components/ProductDetail'
+import Splash from './src/components/Splash'
 import Cart from './src/components/Cart'
 import Order from './src/components/Order'
 import User from './src/components/User'
@@ -23,8 +24,9 @@ function App() {
     }
     return (
         <NavigationContainer>
-            <Stack.Navigator>
-            <Stack.Screen  name="TabNavigator"
+            <Stack.Navigator initialRouteName={'Splash'}>
+                
+                <Stack.Screen  name="TabNavigator"
                     options={{ headerShown: false }}>
                  {() => (
                         <Tab.Navigator screenOptions={({ route }) => ({
@@ -75,9 +77,14 @@ function App() {
                         <Tab.Screen name="User" component={User}  options={{ headerShown: false }}/>
                     </Tab.Navigator>
                     )}
-            </Stack.Screen>
-            <Stack.Screen name="CateGoods" component={CateGoods} options={{ headerShown: false }} />
-            <Stack.Screen name="ProductDetail" component={ProductDetail} options={{ headerShown: false }} />
+                </Stack.Screen>
+                <Stack.Screen
+                    name="Splash"
+                    component={Splash}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen name="CateGoods" component={CateGoods} options={{ headerShown: false }} />
+                <Stack.Screen name="ProductDetail" component={ProductDetail} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
