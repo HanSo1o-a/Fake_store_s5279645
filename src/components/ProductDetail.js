@@ -6,6 +6,7 @@ import { getRequest } from '../utils/request.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart } from '../models/rdstore.js';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
     ScrollView,
@@ -45,8 +46,17 @@ function ProductDetail({navigation, route}) {
     };
 
     const dispatch = useDispatch();
-    function AddToCart(data){
-        dispatch(addToCart(data));
+    async function AddToCart(item){
+        const uid = await AsyncStorage.getItem('uid');
+        console.log('uid',uid);
+        if(!uid){
+            navigation.navigate('TabNavigator', {
+                screen: 'User'
+            });
+            return;
+        }
+        item.uid = uid;
+        dispatch(addToCart(item));
         showToast();
     }
     const id = route.params;

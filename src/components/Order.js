@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation ,useFocusEffect } from '@react-navigation/native';
 import { getRequest } from '../utils/request.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
     ScrollView,
     StatusBar,
@@ -24,7 +26,7 @@ import {
     ReloadInstructions
 } from 'react-native/Libraries/NewAppScreen';
 
-function Categories({navigation}) {
+function Order({navigation}) {
     const isDarkMode = useColorScheme() === 'dark';
 
     const backgroundStyle = {
@@ -48,8 +50,27 @@ function Categories({navigation}) {
           console.error('GET error:', error);
       }
     };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const initUser = async () => {
+                console.log('order:useFocusEffect');
+                const uid = await AsyncStorage.getItem('uid');
+                console.log('uid',uid);
+                if(!uid){
+                    navigation.navigate('User')
+                    return;
+                }
+                fetchData();
+            };
+            initUser();
+            return () => {
+            };
+        }, [])
+    );
+
       useEffect(() => {
-        fetchData();
+        
     }, []);
 
     return (
@@ -61,7 +82,7 @@ function Categories({navigation}) {
         />
         <View style={styles.titleContainer}>
             <Text style={styles.titleText}>
-                Categories
+                My Orders
             </Text>
         </View>
 
@@ -127,5 +148,5 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Categories;
+export default Order;
     

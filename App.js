@@ -13,13 +13,26 @@ import Order from './src/components/Order'
 import User from './src/components/User'
 import { View, Text } from'react-native';
 import { useSelector } from'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Stack=createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function App() {
-    const cartItems = useSelector(state => state.cart.items);
+    const [userId, setUserId] = useState('');
+    useEffect(() => {
+        const initUser = async () => {
+            const uid = await AsyncStorage.getItem('uid');
+            setUserId(uid);
+        };
+        initUser();
+        }, []);
+    const cartItems = useSelector(state => {
+        const allItems = state.cart.items;
+        return userId? allItems.filter(item => item.uid === userId) : allItems;
+    });
     let cartCount = 0;
-    if (cartItems.length > 0) {
+    if (cartItems && cartItems.length > 0) {
         cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
     }
     return (

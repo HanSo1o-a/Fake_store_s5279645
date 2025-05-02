@@ -50,8 +50,13 @@ function Categories({navigation}) {
           console.error('GET error:', error);
       }
     };
+
+    useFocusEffect(
+            React.useCallback(() => {
+                fetchData();
+            }))
       useEffect(() => {
-        fetchData();
+        
     }, []);
 
     return (

@@ -5,6 +5,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getRequest, postRequest } from '../utils/request.js';
 import { saveData, getData, removeData } from '../models/model.js';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
     ScrollView,
     StatusBar,
@@ -45,13 +47,8 @@ function User({ navigation }) {
     const [password, setPassword] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [isUpdate, setIsUpdate] = useState(false);
-    getData('token')
-        .then((value) => {
-            setToken(value);
-        })
-        .catch((error) => {
-        });
-const showFailToast = (msg) => {
+    
+    const showFailToast = (msg) => {
                 Toast.show({
                     type: 'error', 
                     text1: 'error',
@@ -65,7 +62,7 @@ const showFailToast = (msg) => {
                     onHide: () => {} 
                 });
             };
-        const showSuccessToast = (msg) => {
+    const showSuccessToast = (msg) => {
                 Toast.show({
                     type: 'success', 
                     text1: 'success',
@@ -80,15 +77,6 @@ const showFailToast = (msg) => {
                 });
             };
         
-
-    const fetchData = async () => {
-        try {
-            const response = await getRequest('https://fakestoreapi.com/products/categories');
-            console.log(response);
-            setData(response);
-        } catch (error) {
-        }
-    };
 
     const signUpUser = async (name, email, password) => {
         try {
@@ -112,14 +100,6 @@ const showFailToast = (msg) => {
         } catch (error) {
         }
     };
-
-    const updateUser = async () => {
-        try {
-            
-        } catch (error) {
-        }
-    };
-
 
     const logout = async () => {
         try {
@@ -174,8 +154,28 @@ const showFailToast = (msg) => {
         } catch (error) {
         }
     };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const initUser = async () => {
+                const token = await AsyncStorage.getItem('token');
+                if(token){
+                    setToken(token);
+                    const uid = await AsyncStorage.getItem('uid');
+                    setUid(uid);
+                    const email = await AsyncStorage.getItem('email');
+                    setEmail(email);
+                    const username = await AsyncStorage.getItem('username');
+                    setUsername(username);
+                }
+            }
+        initUser();
+            return () => {
+            };
+        }, [])
+    );
     useEffect(() => {
-        fetchData();
+        
     }, []);
     function login(){
         if (email === '') {
