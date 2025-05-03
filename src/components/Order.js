@@ -68,10 +68,18 @@ function Order({navigation}) {
     const dispatch = useDispatch();
     const data = useSelector(state => state.order.items);
     const orderList = [...data].reverse();
+    const [itemVisibility, setItemVisibility] = useState({});
+    const toggleItemVisibility = (id) => {
+        setItemVisibility(prevVisibility => ({
+          ...prevVisibility,
+          [id]: !prevVisibility[id]
+        }));
+    };
     function renderItem({ item }) {
       const orderItemsArray = JSON.parse(item.order_items);
       return (
         <View style={styles.listItem}>
+                
             {
                 item.is_paid === 0 && item.is_delivered === 0? (
                     <Text style={{ color: '#000', textAlign: 'center', borderColor: 'black', borderWidth: 1, borderRadius: 6, padding: 10, backgroundColor: '#4DAFCC' }}>New Orders: {orderItemsArray.length}</Text>
@@ -87,14 +95,28 @@ function Order({navigation}) {
                     )
                 )
             }
+
             <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
                         <Text style={{ flex: 1, textAlign: 'center' }}>Order ID:{item.id}</Text>
                         <Text style={{ flex: 1, textAlign: 'center' }}>Items:{item.item_numbers}</Text>
                         <Text style={{ flex: 1, textAlign: 'center' }}>Total:${item.total_price/100}</Text>
+                    
+                        <TouchableOpacity
+                        onPress={() => {
+                            toggleItemVisibility(item.id);
+                        }} >
+                        <Image
+                            style={{ width: 15, height: 15 }}
+                            source={    itemVisibility[item.id]
+                                ? require('../../images/hide.png')
+                                 : require('../../images/show.png') }
+                        />
+                    </TouchableOpacity>
                     </View>
                     <View style={{ backgroundColor: 'black', height: 1, marginTop: 10 }}></View>
-                    
-            {orderItemsArray.map((orderItem, index) => (
+                    <View style={{ display: itemVisibility[item.id] ? 'flex' : 'none' }}>
+
+                    {orderItemsArray.map((orderItem, index) => (
                 <View key={index}>
                     <TouchableOpacity style={{ display: 'flex', flexDirection: 'row', backgroundColor: '#DEDEDE', margin: 8, padding: 8, borderRadius: 5, borderColor: '#000000' }} onPress={() => navigation.navigate('ProductDetail', orderItem.prodID)}>
                         <Image
@@ -115,8 +137,9 @@ function Order({navigation}) {
                     </TouchableOpacity>
                 </View>
             ))}
-
-{
+                        
+                    
+                        {
                 item.is_paid === 0 && item.is_delivered === 0? (
 
 <View  style={{ flexDirection: 'row' , justifyContent: 'center', marginTop: 10}}>
@@ -149,6 +172,12 @@ function Order({navigation}) {
                     )
                 )
             }
+                    
+                    
+                    </View>
+            
+
+
 
                         
          <Toast />
