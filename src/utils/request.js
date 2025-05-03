@@ -14,9 +14,11 @@ const baseRequest = async (url, options = {}) => {
 };
 
 export const getRequest = async (url) => {
+    const token = await AsyncStorage.getItem('token');
     const options = {
         method: 'GET',
         headers: {
+            'Authorization': 'Bearer '+ token,
             'Content-Type': 'application/json'
         }
     };
@@ -25,7 +27,7 @@ export const getRequest = async (url) => {
 
 export const postRequest = async (url, body) => {
     const token = await AsyncStorage.getItem('token');
-    console.log(token);
+    console.log(url);
     const options = {
         method: 'POST',
         headers: {
@@ -35,14 +37,16 @@ export const postRequest = async (url, body) => {
         body: JSON.stringify(body)
     };
     const res = baseRequest(url, options);
-    console.log(res);
     return res;
 };
 
 export const putRequest = async (url, body) => {
+    const token = await AsyncStorage.getItem('token');
+    console.log(token,url,body);
     const options = {
         method: 'PUT',
         headers: {
+            'Authorization': 'Bearer '+ token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
@@ -59,3 +63,5 @@ export const deleteRequest = async (url) => {
     };
     return baseRequest(url, options);
 };  
+
+export const host = 'http://192.168.0.7:3000/';

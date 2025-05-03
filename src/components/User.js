@@ -2,10 +2,12 @@ import React, { useState, useEffect, use } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { getRequest, postRequest } from '../utils/request.js';
+import { getRequest, postRequest, host } from '../utils/request.js';
 import { saveData, getData, removeData } from '../models/model.js';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector, useDispatch } from'react-redux';
+import { addToOrder, removeFromOrder, updateUser, clearFromCart, clearFromOrder, addToCart } from '../models/rdstore.js';
 
 import {
     ScrollView,
@@ -47,7 +49,18 @@ function User({ navigation }) {
     const [password, setPassword] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [isUpdate, setIsUpdate] = useState(false);
-    
+
+    const dispatch = useDispatch();
+    const user = useSelector(state => state.user); 
+
+    function addOrder(item) {
+        dispatch(addToOrder(item))
+    }
+
+    function addCart(item) {
+        dispatch(addToCart(item))
+    }
+
     const showFailToast = (msg) => {
                 Toast.show({
                     type: 'error', 
@@ -80,13 +93,18 @@ function User({ navigation }) {
 
     const signUpUser = async (name, email, password) => {
         try {
-            const response = await postRequest('http://192.168.0.12:3000/users/signup',{
+            const response = await postRequest(host+'users/signup',{
                 name:name, email: email, password: password
             });
-            console.log(response);
             if(response.status !== 'OK'){
                 showFailToast(response.message);
             }else{
+                dispatch(updateUser({
+                    token: response.token,
+                    name: response.name,
+                    email: response.email,
+                    uid: response.id+''
+                }));
                 saveData('uid',response.id+'')
                 saveData('username',response.name);
                 saveData('email',response.email);
@@ -103,14 +121,22 @@ function User({ navigation }) {
 
     const logout = async () => {
         try {
-            removeData('uid');
-            removeData('username');
-            removeData('email');
-            removeData('token');
+            dispatch(clearFromOrder());
+            dispatch(clearFromCart());
+            dispatch(updateUser({
+                token: '',
+                name: '',
+                email: '',
+                uid: ''
+            }));
+            saveData('uid','')
+            saveData('username','');
+            saveData('email','');
+            saveData('token','');
             setToken('');
             setUsername('');
             setEmail('');
-            setUid(0);
+            setUid('');
             setPassword('');
         } catch (error) {
         }
@@ -118,7 +144,7 @@ function User({ navigation }) {
 
     const updUser = async (name, password) => {
         try {
-            const response = await postRequest('http://192.168.0.12:3000/users/update',{
+            const response = await postRequest(host+'users/update',{
                 name: name, password: password
             });
             if(response.status !== 'OK'){
@@ -135,13 +161,18 @@ function User({ navigation }) {
 
     const signInUser = async (email, password) => {
         try {
-            const response = await postRequest('http://192.168.0.12:3000/users/signin',{
+            const response = await postRequest(host+'users/signin',{
                 email: email, password: password
             });
-            console.log(response);
             if(response.status !== 'OK'){
                 showFailToast(response.message);
             }else{
+                dispatch(updateUser({
+                    token: response.token,
+                    name: response.name,
+                    email: response.email,
+                    uid: response.id+''
+                }));
                 saveData('uid',response.id+'')
                 saveData('username',response.name);
                 saveData('email',response.email);
@@ -150,29 +181,73 @@ function User({ navigation }) {
                 setUsername(response.name);
                 setEmail(response.email);
                 setUid(response.id+'');
+                getOrders();
+                getCarts();
             }
         } catch (error) {
         }
     };
-
-    useFocusEffect(
-        React.useCallback(() => {
-            const initUser = async () => {
-                const token = await AsyncStorage.getItem('token');
-                if(token){
-                    setToken(token);
-                    const uid = await AsyncStorage.getItem('uid');
-                    setUid(uid);
-                    const email = await AsyncStorage.getItem('email');
-                    setEmail(email);
-                    const username = await AsyncStorage.getItem('username');
-                    setUsername(username);
+    const getOrders = async () => {
+        try {
+            const response = await getRequest(host+'orders/all',);
+            if(response.status !== 'OK'){
+                showFailToast(response.message);
+            }else{
+                const items = response.orders;
+                if(items && items.length>0){
+                    for (const key in items) {
+                        addOrder(items[key])
+                    }
                 }
             }
-        initUser();
-            return () => {
-            };
-        }, [])
+        } catch (error) {
+        }
+    };
+    const getCarts = async () => {
+        try {
+            const response = await getRequest(host+'cart');
+            if(response.status !== 'OK'){
+                showFailToast(response.message);
+            }else{
+                const items = response.items;
+                if(items && items.length>0){
+                    for (const key in items) {
+                        console.log(items[key]);
+                        addCart(items[key]);
+                    }
+                }
+            }
+        } catch (error) {
+        }
+    };
+    useFocusEffect(
+        React.useCallback(() => {
+            setToken(user.token);
+            setEmail(user.email);
+            setUsername(user.name);
+            setUid(user.uid);
+            if(!user.uid){
+                console.log("xxx");
+                dispatch(clearFromOrder());
+                dispatch(clearFromCart());
+                dispatch(updateUser({
+                    token: '',
+                    name: '',
+                    email: '',
+                    uid: ''
+                }));
+                saveData('uid','')
+                saveData('username','');
+                saveData('email','');
+                saveData('token','');
+                setToken('');
+                setUsername('');
+                setEmail('');
+                setUid('');
+                setPassword('');
+            }
+            return () => { };
+        }, [user])
     );
     useEffect(() => {
         

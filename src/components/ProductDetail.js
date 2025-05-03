@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation ,useFocusEffect } from '@react-navigation/native';
-import { getRequest } from '../utils/request.js';
+import { getRequest, postRequest , host, putRequest } from '../utils/request.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart } from '../models/rdstore.js';
 import Toast from 'react-native-toast-message';
@@ -46,6 +46,7 @@ function ProductDetail({navigation, route}) {
     };
 
     const dispatch = useDispatch();
+    const cartItems = useSelector(state => state.cart.items);
     async function AddToCart(item){
         const uid = await AsyncStorage.getItem('uid');
         console.log('uid',uid);
@@ -56,7 +57,10 @@ function ProductDetail({navigation, route}) {
             return;
         }
         item.uid = uid;
+        item.rating = "";
         dispatch(addToCart(item));
+        const newCartItems = [...cartItems, item];
+        const response = putRequest(host+'cart',{'items':newCartItems});
         showToast();
     }
     const id = route.params;

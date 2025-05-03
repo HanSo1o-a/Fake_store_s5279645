@@ -2,9 +2,9 @@ import React, { useState, useEffect } from'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { getRequest } from '../utils/request.js';
+import { getRequest, postRequest , host, putRequest} from '../utils/request.js';
 import { useSelector, useDispatch } from'react-redux';
-import { addToCart, delFromCart } from '../models/rdstore.js';
+import { addToCart, delFromCart, addToOrder, clearFromCart, clearFromOrder } from '../models/rdstore.js';
 import Toast from'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -30,27 +30,102 @@ import {
 } from'react-native/Libraries/NewAppScreen';
 
 function Cart({ navigation, route }) {
-    const showToast = () => {
-        Toast.show({
-            type:'success',
-            text1:'success',
-            text2: 'Add To Cart',
-            position: 'bottom',
-            visibilityTime: 3000,
-            autoHide: true,
-            topOffset: 30,
-            bottomOffset: 10,
-            onShow: () => { },
-            onHide: () => { }
-        });
-    };
+    const showFailToast = (msg) => {
+                    Toast.show({
+                        type: 'error', 
+                        text1: 'error',
+                        text2: msg,
+                        position: 'bottom', 
+                        visibilityTime: 3000, 
+                        autoHide: true, 
+                        topOffset: 30, 
+                        bottomOffset: 10, 
+                        onShow: () => {}, 
+                        onHide: () => {} 
+                    });
+                };
+        const showSuccessToast = (msg) => {
+                    Toast.show({
+                        type: 'success', 
+                        text1: 'success',
+                        text2: msg,
+                        position: 'bottom', 
+                        visibilityTime: 3000, 
+                        autoHide: true, 
+                        topOffset: 30, 
+                        bottomOffset: 10, 
+                        onShow: () => {}, 
+                        onHide: () => {} 
+                    });
+                };
+            
 
     const dispatch = useDispatch();
+    const user = useSelector(state => state.user); 
+    
+    function transformData(data) {
+        return {
+            items: data.map(item => ({
+                prodID: item.id,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+                title: item.title,
+                description: item.description
+            }))
+        };
+    }
+    
+    function addOrder() {
+        const orders = transformData(data);
+        console.log(orders);
+        checkout(orders);
+        setNeedUpd(true);
+        dispatch(clearFromCart());
+    }
+
+    async function checkout(orders){
+         try {
+            const response = await postRequest(host+'orders/neworder',orders);
+            console.log(response);
+            if(response.status !== 'OK'){
+                showFailToast(response.message);
+            }else{
+                getOrders();
+                dispatch(clearFromOrder());
+                showSuccessToast(response.message);
+            }
+        } catch (error) {
+        }
+    }
+
+    const getOrders = async () => {
+            try {
+                const response = await getRequest(host+'orders/all',);
+                if(response.status !== 'OK'){
+                    showFailToast(response.message);
+                }else{
+                    const items = response.orders;
+                    if(items && items.length>0){
+                        for (const key in items) {
+                            dispatch(addToOrder(items[key]))
+                        }
+                    }
+                    navigation.navigate('TabNavigator', {
+                        screen: 'Order'
+                    });
+                }
+            } catch (error) {
+            }
+        };
+
     function addCart(item) {
+        setNeedUpd(true);
         dispatch(addToCart(item))
     }
 
     function delCart(item) {
+        setNeedUpd(true);
         dispatch(delFromCart(item))
     }
 
@@ -60,14 +135,11 @@ function Cart({ navigation, route }) {
     };
     const safePadding = '5%';
     const [userId, setUserId] = useState('');
+    const [needUpd, setNeedUpd] = useState(false);
 
-    useEffect(() => {
-        
-    }, []);
     useFocusEffect(
         React.useCallback(() => {
             const initUser = async () => {
-                console.log('order:useFocusEffect');
                 const uid = await AsyncStorage.getItem('uid');
                 console.log('uid',uid);
                 setUserId(uid);
@@ -81,13 +153,17 @@ function Cart({ navigation, route }) {
             };
         }, [])
     );
-    const data = useSelector(state => {
-        const allItems = state.cart.items;
-        return userId? allItems.filter(item => item.uid === userId) : allItems;
-    });
 
+    const data = useSelector(state => state.cart.items);
     const totalQuantity = data.reduce((ac, item) => ac + item.quantity, 0);
     const totalPrice = data.reduce((ac, item) => ac + (item.price * item.quantity), 0);
+
+    useEffect(() => {
+        if(needUpd){
+            setNeedUpd(false);
+            putRequest(host+'cart',{'items':data});
+        }
+    }, [data]);
     function renderItem({ item }) {
         return (
             <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('ProductDetail', item.id)} >
@@ -150,7 +226,7 @@ function Cart({ navigation, route }) {
                     </View>
                     <View style={{ width: '90%', height: 1, backgroundColor: 'black', marginLeft: '5%' }}></View>
                     <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20, marginBottom: 20 }}>
-                        <TouchableOpacity style={{ flexDirection: 'row', width: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2B6CCF', borderRadius: 6, borderWidth: 2, padding: 5, borderColor: '#000000' }}>
+                        <TouchableOpacity onPress={()=>{addOrder()}} style={{ flexDirection: 'row', width: 150, alignItems: 'center', justifyContent: 'center', backgroundColor: '#2B6CCF', borderRadius: 6, borderWidth: 2, padding: 5, borderColor: '#000000' }}>
                             <Image
                                 style={{ width: 15, height: 15 }}
                                 source={

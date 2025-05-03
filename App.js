@@ -19,26 +19,19 @@ const Stack=createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function App() {
-    const [userId, setUserId] = useState('');
-    useEffect(() => {
-        const initUser = async () => {
-            const uid = await AsyncStorage.getItem('uid');
-            setUserId(uid);
-        };
-        initUser();
-        }, []);
-    const cartItems = useSelector(state => {
-        const allItems = state.cart.items;
-        return userId? allItems.filter(item => item.uid === userId) : allItems;
-    });
+    const cartItems = useSelector(state => state.cart.items);
     let cartCount = 0;
     if (cartItems && cartItems.length > 0) {
         cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
     }
+    const orderItems = useSelector(state => state.order.items);
+    let orderCount = 0;
+    if (orderItems && orderItems.length > 0) {
+        orderCount = orderItems.length;
+    }
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName={'Splash'}>
-                
                 <Stack.Screen  name="TabNavigator"
                     options={{ headerShown: false }}>
                  {() => (
@@ -74,6 +67,25 @@ function App() {
                                                 alignItems: 'center'
                                             }}>
                                                 <Text style={{ color: 'white', fontSize: 10 }}>{cartCount}</Text>
+                                            </View>
+                                        </View>
+                                    );
+                                }else if (route.name === 'Order' && orderCount > 0) {
+                                    return (
+                                        <View style={{ position: 'relative' }}>
+                                            {icon}
+                                            <View style={{
+                                                position: 'absolute',
+                                                top: -2,
+                                                right: -2,
+                                                backgroundColor: 'red',
+                                                borderRadius: 8,
+                                                width: 16,
+                                                height: 16,
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Text style={{ color: 'white', fontSize: 10 }}>{orderCount}</Text>
                                             </View>
                                         </View>
                                     );
