@@ -139,7 +139,6 @@ function Cart({ navigation, route }) {
         React.useCallback(() => {
             const initUser = async () => {
                 const uid = await AsyncStorage.getItem('uid');
-                console.log('uid',uid);
                 setUserId(uid);
                 if(!uid){
                     setIsLogin(true);
@@ -252,7 +251,6 @@ function Cart({ navigation, route }) {
             )}
 
         </View>)}
-        <Toast />
         </View>
     );
 }
