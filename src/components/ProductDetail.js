@@ -44,16 +44,32 @@ function ProductDetail({navigation, route}) {
             onHide: () => {} 
         });
     };
-
+const showFailToast = (msg) => {
+                    Toast.show({
+                        type: 'error', 
+                        text1: 'error',
+                        text2: msg,
+                        position: 'bottom', 
+                        visibilityTime: 3000, 
+                        autoHide: true, 
+                        topOffset: 30, 
+                        bottomOffset: 10, 
+                        onShow: () => {}, 
+                        onHide: () => {} 
+                    });
+                };
     const dispatch = useDispatch();
     const cartItems = useSelector(state => state.cart.items);
     async function AddToCart(item){
         const uid = await AsyncStorage.getItem('uid');
         console.log('uid',uid);
         if(!uid){
-            navigation.navigate('TabNavigator', {
-                screen: 'User'
-            });
+            showFailToast('login is required');
+            setTimeout(() => {
+                navigation.navigate('TabNavigator', {
+                    screen: 'User'
+                });
+            }, 2000);
             return;
         }
         item.uid = uid;
@@ -141,7 +157,6 @@ function ProductDetail({navigation, route}) {
     />
     <Text style={{ color: 'white', marginLeft: 10}}>Add To Cart</Text>
     </TouchableOpacity>
-    <Toast />
 </View>
 
     <Text style={{ marginLeft: 12, marginTop: 10, fontWeight: 'bold'}}>Description</Text>

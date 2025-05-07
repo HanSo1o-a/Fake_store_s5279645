@@ -69,6 +69,7 @@ function Order({navigation}) {
     const data = useSelector(state => state.order.items);
     const orderList = [...data].reverse();
     const [itemVisibility, setItemVisibility] = useState({});
+    const [isLogin, setIsLogin] = useState(false);
     const toggleItemVisibility = (id) => {
         setItemVisibility(prevVisibility => ({
           ...prevVisibility,
@@ -175,12 +176,6 @@ function Order({navigation}) {
                     
                     
                     </View>
-            
-
-
-
-                        
-         <Toast />
         </View>
     );
   }
@@ -190,7 +185,6 @@ function Order({navigation}) {
             "isPaid": 1,
             "isDelivered": 0
             });
-            console.log(response);
             if(response.status !== 'OK'){
                 showFailToast(response.message);
             }else{
@@ -233,22 +227,16 @@ function Order({navigation}) {
             showSuccessToast(response.message);
         }
 }
-    const fetchData = async () => {
-      try {
-          const response = await getRequest('https://fakestoreapi.com/products/categories');
-          console.log(response);
-        } catch (error) {
-          console.error('GET error:', error);
-      }
-    };
 
     useFocusEffect(
         React.useCallback(() => {
             const initUser = async () => {
                 const uid = await AsyncStorage.getItem('uid');
                 if(!uid){
-                    navigation.navigate('User')
-                    return;
+                    setIsLogin(true);
+                    showFailToast('login is required');
+                }else{
+                    setIsLogin(false);
                 }
             };
             initUser();
@@ -260,7 +248,21 @@ function Order({navigation}) {
     }, [data]);
 
     return (
-      <View style={{ display: 'flex', flexDirection:'column', height: '100%' }}>
+      <View>
+{isLogin?(<View style={{ display: 'flex',  alignItems: 'center'}}>
+    <TouchableOpacity onPress={()=> {
+        navigation.navigate('User')
+    }} style={{marginTop: 300, flexDirection: 'row' , width: 200, alignItems: 'center', justifyContent:'center', backgroundColor: '#47A2D1', borderRadius: 6,  borderWidth: 2,  padding: 5 ,borderColor: 'black'}}>
+                                    <Image
+                                        style={{ width: 15, height: 15 }}
+                                        source={    
+                                            require('../../images/smile.png')}
+                                    />
+                                    <Text style={{ color: 'white', marginLeft: 10, fontSize: 25}}>Sign In</Text>
+                                    </TouchableOpacity>
+</View>):(
+
+<View style={{ display: 'flex', flexDirection:'column', height: '100%' }}>
         <StatusBar
             hidden
             barStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -288,6 +290,10 @@ function Order({navigation}) {
              
         )}
         
+
+      </View>
+
+)}
 
       </View>
     );

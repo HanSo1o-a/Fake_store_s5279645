@@ -78,7 +78,6 @@ function Cart({ navigation, route }) {
     
     function addOrder() {
         const orders = transformData(data);
-        console.log(orders);
         checkout(orders);
         setNeedUpd(true);
         dispatch(clearFromCart());
@@ -87,7 +86,6 @@ function Cart({ navigation, route }) {
     async function checkout(orders){
          try {
             const response = await postRequest(host+'orders/neworder',orders);
-            console.log(response);
             if(response.status !== 'OK'){
                 showFailToast(response.message);
             }else{
@@ -136,7 +134,7 @@ function Cart({ navigation, route }) {
     const safePadding = '5%';
     const [userId, setUserId] = useState('');
     const [needUpd, setNeedUpd] = useState(false);
-
+    const [isLogin, setIsLogin] = useState(false);
     useFocusEffect(
         React.useCallback(() => {
             const initUser = async () => {
@@ -144,8 +142,10 @@ function Cart({ navigation, route }) {
                 console.log('uid',uid);
                 setUserId(uid);
                 if(!uid){
-                    navigation.navigate('User')
-                    return;
+                    setIsLogin(true);
+                    showFailToast('login is required');
+                }else{
+                    setIsLogin(false);
                 }
             };
             initUser();
@@ -190,7 +190,19 @@ function Cart({ navigation, route }) {
     }
 
     return (
-        <View style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <View>
+{isLogin ? (<View style={{ display: 'flex',  alignItems: 'center'}}>
+    <TouchableOpacity onPress={()=> {
+        navigation.navigate('User')
+    }} style={{marginTop: 300, flexDirection: 'row' , width: 200, alignItems: 'center', justifyContent:'center', backgroundColor: '#47A2D1', borderRadius: 6,  borderWidth: 2,  padding: 5 ,borderColor: 'black'}}>
+                                    <Image
+                                        style={{ width: 15, height: 15 }}
+                                        source={    
+                                            require('../../images/smile.png')}
+                                    />
+                                    <Text style={{ color: 'white', marginLeft: 10, fontSize: 25}}>Sign In</Text>
+                                    </TouchableOpacity>
+</View>): (<View style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <StatusBar
                 hidden
                 barStyle={isDarkMode? 'light-content' : 'dark-content'}
@@ -239,7 +251,8 @@ function Cart({ navigation, route }) {
                 </View>
             )}
 
-            <Toast />
+        </View>)}
+        <Toast />
         </View>
     );
 }

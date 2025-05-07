@@ -14,7 +14,7 @@ import User from './src/components/User'
 import { View, Text } from'react-native';
 import { useSelector } from'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Toast from'react-native-toast-message';
 const Stack=createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -111,6 +111,7 @@ function App() {
                 <Stack.Screen name="CateGoods" component={CateGoods} options={{ headerShown: false }} />
                 <Stack.Screen name="ProductDetail" component={ProductDetail} options={{ headerShown: false }} />
             </Stack.Navigator>
+            <Toast />
         </NavigationContainer>
     );
 }

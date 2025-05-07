@@ -487,7 +487,6 @@ function User({ navigation }) {
                     </View>
                 )
             )}
-               <Toast />
         </ScrollView>
     );
 }
